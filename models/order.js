@@ -1,6 +1,7 @@
 'use strict';
 
 const { Model } = require('sequelize');
+const axios = require('axios');
 
 module.exports = (sequelize, DataTypes) => {
   class Order extends Model { }
@@ -20,6 +21,19 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Order',
+  });
+
+  // Define a hook to execute after an order is created
+  Order.afterCreate(async (order) => {
+    // Use the URL of Topic API
+    const api_url = process.env.LESS_TOPIC_URL;
+
+    try {
+      // Make the POST request using axios
+      await axios.post(`${api_url}/topics/order_created`, order);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   });
 
   return Order;
